@@ -42,7 +42,6 @@ sub setup_finished {
     }
 
     # Set default values
-    $config->{expires}       ||= 3600;
     $config->{id_field}      ||= $primaries[0] || 'id';
     $config->{data_field}    ||= 'session_data';
     $config->{expires_field} ||= 'expires';
@@ -208,7 +207,7 @@ For more information, please see L<Catalyst::Model::DBIC::Schema>.
 
 =head2 expires
 
-Number of seconds for which sessions are active.  Defaults to 3600.
+Number of seconds for which sessions are active.
 
 Note that no automatic cleanup is done on your session data.  To
 delete expired sessions, you can use the L</delete_expired_sessions>
