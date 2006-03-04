@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use FindBin;
 use Test::More;
+
 use lib "$FindBin::Bin/lib";
 
 BEGIN {
@@ -30,7 +31,7 @@ BEGIN {
             expires_field => 'expires',
         },
     };
-    
+
     $ENV{TESTAPP_PLUGINS} = [qw/
         Session
         Session::State::Cookie
@@ -47,16 +48,12 @@ my $key   = 'db';
 my $value = scalar localtime;
 
 # Setup session
-{
-    $mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'request to set session value ok');
-    $mech->content_is('ok', 'set session value');
-}
+$mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'request to set session value ok');
+$mech->content_is('ok', 'set session value');
 
 # Check session
-{
-    $mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value ok');
-    $mech->content_is($value, 'got session value back');
-}
+$mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value ok');
+$mech->content_is($value, 'got session value back');
 
-# clean up
+# Clean up
 unlink $ENV{TESTAPP_DB_FILE};

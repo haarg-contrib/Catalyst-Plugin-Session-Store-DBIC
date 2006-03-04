@@ -77,7 +77,7 @@ sub get_session_data {
 
 sub store_session_data {
     my ($c, $key, $data) = @_;
-    
+
     my $config = $c->config->{session};
 
     # expires:sid keys only update the expiration time
@@ -159,7 +159,7 @@ Catalyst::Plugin::Session::Store::DBIC - Store your sessions via DBIx::Class
 
     # In your application
     use Catalyst qw/Session Session::Store::DBIC Session::State::Cookie/;
-    
+
     __PACKAGE__->config(
         # ... other items ...
         session => {
@@ -232,7 +232,7 @@ expiration time of the session.  Defaults to C<expires>.
 
 =head1 SCHEMA
 
-Your C<sessions> table must contain the following columns:
+Your C<sessions> table should contain the following columns:
 
     id           CHAR(72) PRIMARY KEY
     session_data TEXT
@@ -252,7 +252,7 @@ session.  This may be null for per-user and flash sessions.
 
 Note that you can change the column names using the L</id_field>,
 L</data_field>, and L</expires_field> configuration parameters.
-However, the column types should match the above.
+However, the column types must match the above.
 
 =head1 INTERNAL METHODS
 
