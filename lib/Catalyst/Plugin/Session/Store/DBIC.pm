@@ -232,7 +232,7 @@ expiration time of the session.  Defaults to C<expires>.
 
 =head1 SCHEMA
 
-Your C<sessions> table should contain the following columns:
+Your sessions table should contain the following columns:
 
     id           CHAR(72) PRIMARY KEY
     session_data TEXT
@@ -280,7 +280,7 @@ Required method for a L<Catalyst::Plugin::Session::Store>.
 
 Daniel Westermann-Clark, E<lt>danieltwc@cpan.orgE<gt>
 
-=head1 ACKNOWLEDGEMENTS
+=head1 ACKNOWLEDGMENTS
 
 =over 4
 
