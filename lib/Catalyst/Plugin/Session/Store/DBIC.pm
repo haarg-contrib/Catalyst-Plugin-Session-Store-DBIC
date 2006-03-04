@@ -8,7 +8,7 @@ use MIME::Base64;
 use NEXT;
 use Storable qw/nfreeze thaw/;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 __PACKAGE__->mk_classdata(qw/_dbic_session_obj/);
 
@@ -239,9 +239,9 @@ Your sessions table should contain the following columns:
 
 The C<id> column should probably be 72 characters.  It needs to handle
 the longest string that can be returned by
-L<Catalyst::Plugin::Authentication/generate_session_id>, plus another
-eight characters for internal use.  This is less than 72 characters
-when SHA-1 or MD5 is used, but SHA-256 will need all 72 characters.
+L<Catalyst::Plugin::Session/generate_session_id>, plus another eight
+characters for internal use.  This is less than 72 characters when
+SHA-1 or MD5 is used, but SHA-256 will need all 72 characters.
 
 The C<session_data> column should be a long text field.  Session data
 is encoded using L<MIME::Base64> before being stored in the database.

@@ -1,4 +1,7 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
+0.02  Sat Mar  4 15:55:30 EST 2006
+        - Minor documentation update
+
 0.01  Sat Mar  4 13:02:28 EST 2006
         - Initial revision
