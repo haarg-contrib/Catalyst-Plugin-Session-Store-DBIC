@@ -15,7 +15,7 @@ BEGIN {
         or plan skip_all => "Catalyst::Plugin::Session::State::Cookie is required for this test";
 
     eval { require Test::WWW::Mechanize::Catalyst }
-        or plan skip_all => "Test::WWW::Mechanize::Catalyst is required for the test";
+        or plan skip_all => "Test::WWW::Mechanize::Catalyst is required for this test";
 
     plan tests => 4;
 
