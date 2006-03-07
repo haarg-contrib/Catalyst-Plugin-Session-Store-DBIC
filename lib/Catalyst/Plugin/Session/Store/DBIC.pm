@@ -8,9 +8,19 @@ use MIME::Base64;
 use NEXT;
 use Storable qw/nfreeze thaw/;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 __PACKAGE__->mk_classdata(qw/_dbic_session_obj/);
+
+sub setup_session {
+    my $c = shift;
+
+    $c->NEXT::setup_session(@_);
+
+    Catalyst::Exception->throw(
+        message => __PACKAGE__ . qq/: You must provide a value for dbic_class/
+    ) unless $c->config->{session}->{dbic_class};
+}
 
 sub setup_finished {
     my $c = shift;
@@ -19,19 +29,14 @@ sub setup_finished {
 
     my $config = $c->config->{session};
 
-    if (my $dbic_class = $config->{dbic_class}) {
-        my $model = $c->model($dbic_class) || $c->comp($dbic_class);
-        my $obj   = ref $model ? $model
-            : $dbic_class->can('resultset_instance') ? $dbic_class->resultset_instance
-            : $dbic_class;
+    # Store a reference to the configured session class or object
+    my $dbic_class = $config->{dbic_class};
+    my $model      = $c->model($dbic_class) || $c->comp($dbic_class);
 
-        $c->_dbic_session_obj($obj);
-    }
-    else {
-        Catalyst::Exception->throw(
-            message => __PACKAGE__ . qq/: You must provide a value for dbic_class/
-        );
-    }
+    my $obj = ref $model ? $model
+        : $dbic_class->can('resultset_instance') ? $dbic_class->resultset_instance
+        : $dbic_class;
+    $c->_dbic_session_obj($obj);
 
     # Try to determine id_field if it isn't set
     my @primaries = $c->_dbic_session_obj->result_source->primary_columns;
@@ -254,6 +259,11 @@ L</data_field>, and L</expires_field> configuration parameters.
 However, the column types must match the above.
 
 =head1 INTERNAL METHODS
+
+=head2 setup_session
+
+Verify that the configuration is valid, i.e. that a value for the
+C<dbic_class> configuration parameter is provided.
 
 =head2 setup_finished
 
