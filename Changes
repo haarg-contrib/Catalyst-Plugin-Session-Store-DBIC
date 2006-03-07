@@ -1,6 +1,6 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
-0.03
+0.03  Mon Mar  6 21:17:38 EST 2006
         - Check the configuration earlier for a dbic_class value
 
 0.02  Sat Mar  4 15:55:30 EST 2006

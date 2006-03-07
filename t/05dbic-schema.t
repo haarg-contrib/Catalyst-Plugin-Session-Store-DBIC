@@ -25,7 +25,7 @@ BEGIN {
     $ENV{TESTAPP_DB_FILE} = "$FindBin::Bin/session.db";
 
     $ENV{TESTAPP_CONFIG} = {
-        name => 'TestApp',
+        name    => 'TestApp',
         session => {
             dbic_class => 'DBICSchema::Session',
             data_field => 'data',

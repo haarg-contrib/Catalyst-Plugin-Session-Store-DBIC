@@ -2,7 +2,7 @@ package TestApp::Schema::Session;
 
 use strict;
 use warnings;
-use base 'DBIx::Class';
+use base qw/DBIx::Class/;
 
 __PACKAGE__->load_components(qw/Core/);
 

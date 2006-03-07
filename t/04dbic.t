@@ -22,7 +22,7 @@ BEGIN {
     $ENV{TESTAPP_DB_FILE} = "$FindBin::Bin/session.db";
 
     $ENV{TESTAPP_CONFIG} = {
-        name => 'TestApp',
+        name    => 'TestApp',
         session => {
             dbic_class    => 'TestApp::Model::DBIC::Session',
             expires       => 3600,

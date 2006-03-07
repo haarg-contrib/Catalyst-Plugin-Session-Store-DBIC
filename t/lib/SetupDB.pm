@@ -1,3 +1,8 @@
+package SetupDB;
+
+use strict;
+use warnings;
+
 # Create the database
 my $db_file = $ENV{TESTAPP_DB_FILE};
 unlink $db_file if -e $db_file;
@@ -12,3 +17,5 @@ my $sql = q{
 };
 $dbh->do($_) for split /;/, $sql;
 $dbh->disconnect;
+
+1;

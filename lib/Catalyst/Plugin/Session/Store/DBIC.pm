@@ -146,7 +146,7 @@ Catalyst::Plugin::Session::Store::DBIC - Store your sessions via DBIx::Class
     CREATE TABLE sessions (
         id           CHAR(72) PRIMARY KEY,
         session_data TEXT,
-        expires      INT
+        expires      INTEGER
     );
 
     # Create the corresponding table class
