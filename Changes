@@ -5,6 +5,8 @@ Revision history for Catalyst-Plugin-Session-Store-DBIC
           before the sesssion, so make sure the session row is created then
         - Minor cleanup to get_session_data and store_session_data
           methods
+        - Use delete instead of delete_all to avoid object inflation
+          penalty in delete_session_data and delete_expired_sessions
 
 0.03  Mon Mar  6 21:17:38 EST 2006
         - Check the configuration earlier for a dbic_class value

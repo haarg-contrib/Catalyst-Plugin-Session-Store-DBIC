@@ -108,7 +108,7 @@ sub delete_session_data {
 
     $c->_dbic_session_resultset->search({
         $config->{id_field} => $key,
-    })->delete_all;
+    })->delete;
 }
 
 sub delete_expired_sessions {
@@ -118,7 +118,7 @@ sub delete_expired_sessions {
 
     $c->_dbic_session_resultset->search({
         $config->{expires_field} => { '<', time() },
-    })->delete_all;
+    })->delete;
 }
 
 1;

@@ -20,7 +20,7 @@ BEGIN {
     eval { require Catalyst::Model::DBIC::Schema }
         or plan skip_all => "Catalyst::Model::DBIC::Schema is required for this test";
 
-    plan tests => 4;
+    plan tests => 6;
 
     $ENV{TESTAPP_DB_FILE} = "$FindBin::Bin/session.db";
 
@@ -54,6 +54,10 @@ $mech->content_is('ok', 'set session value');
 # Check session
 $mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value ok');
 $mech->content_is($value, 'got session value back');
+
+# Delete session
+$mech->get_ok('http://localhost/session/delete', 'request to delete session ok');
+$mech->content_is('ok', 'deleted session');
 
 # Clean up
 unlink $ENV{TESTAPP_DB_FILE};

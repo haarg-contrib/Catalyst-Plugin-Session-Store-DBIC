@@ -22,4 +22,13 @@ sub output : Local {
     $c->res->body($c->session->{$key});
 }
 
+sub delete : Local {
+    my ($self, $c) = @_;
+
+    my $key = $c->req->param('key') || 'key';
+
+    $c->delete_session('logout');
+    $c->res->body($c->session_is_valid ? 'not ok' : 'ok');
+}
+
 1;
