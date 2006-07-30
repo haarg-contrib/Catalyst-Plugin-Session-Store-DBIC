@@ -133,13 +133,15 @@ sub get_session_data {
         $want_expires = 1;
     }
 
-    my $session = $c->_dbic_session_resultset->find($key);
+    my $field = $want_expires
+        ? $config->{expires_field}
+        : $config->{data_field};
+    my $session = $c->_dbic_session_resultset->find($key, { select => $field });
     return unless $session;
 
-    return $session->get_column($config->{expires_field})
-        if $want_expires;
+    my $data = $session->get_column($field);
+    return $data if $want_expires;
 
-    my $data = $session->get_column($config->{data_field});
     return thaw(decode_base64($data));
 }
 

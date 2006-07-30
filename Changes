@@ -7,6 +7,7 @@ Revision history for Catalyst-Plugin-Session-Store-DBIC
           methods
         - Use delete instead of delete_all to avoid object inflation
           penalty in delete_session_data and delete_expired_sessions
+        - Use 'select' to fetch only the desired field from the database
 
 0.03  Mon Mar  6 21:17:38 EST 2006
         - Check the configuration earlier for a dbic_class value
