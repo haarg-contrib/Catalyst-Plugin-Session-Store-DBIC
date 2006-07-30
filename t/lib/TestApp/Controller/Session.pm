@@ -25,10 +25,15 @@ sub output : Local {
 sub delete : Local {
     my ($self, $c) = @_;
 
-    my $key = $c->req->param('key') || 'key';
-
-    $c->delete_session('logout');
+    $c->delete_session;
     $c->res->body($c->session_is_valid ? 'not ok' : 'ok');
+}
+
+sub delete_expired : Local {
+    my ($self, $c) = @_;
+
+    $c->delete_expired_sessions;
+    $c->res->body('ok');
 }
 
 1;

@@ -17,7 +17,7 @@ BEGIN {
     eval { require Test::WWW::Mechanize::Catalyst }
         or plan skip_all => "Test::WWW::Mechanize::Catalyst is required for this test";
 
-    plan tests => 6;
+    plan tests => 8;
 
     $ENV{TESTAPP_DB_FILE} = "$FindBin::Bin/session.db";
 
@@ -58,6 +58,10 @@ $mech->content_is($value, 'got session value back');
 # Delete session
 $mech->get_ok('http://localhost/session/delete', 'request to delete session ok');
 $mech->content_is('ok', 'deleted session');
+
+# Delete expired sessions
+$mech->get_ok('http://localhost/session/delete_expired', 'request to delete expired sessions ok');
+$mech->content_is('ok', 'deleted expired sessions');
 
 # Clean up
 unlink $ENV{TESTAPP_DB_FILE};
