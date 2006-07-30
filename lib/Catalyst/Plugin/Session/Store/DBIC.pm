@@ -8,9 +8,9 @@ use MIME::Base64;
 use NEXT;
 use Storable qw/nfreeze thaw/;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
-__PACKAGE__->mk_classdata(qw/_dbic_session_obj/);
+__PACKAGE__->mk_classdata(qw/_dbic_session_resultset/);
 
 sub setup_session {
     my $c = shift;
@@ -36,10 +36,10 @@ sub setup_finished {
     my $obj = ref $model ? $model
         : $dbic_class->can('resultset_instance') ? $dbic_class->resultset_instance
         : $dbic_class;
-    $c->_dbic_session_obj($obj);
+    $c->_dbic_session_resultset($obj);
 
     # Try to determine id_field if it isn't set
-    my @primaries = $c->_dbic_session_obj->result_source->primary_columns;
+    my @primaries = $obj->result_source->primary_columns;
     if (scalar @primaries > 1 and not exists $config->{id_field}) {
         Catalyst::Exception->throw(
             message => __PACKAGE__ . qq/: Primary key consists of more than one column; please set id_field manually/
@@ -60,23 +60,20 @@ sub get_session_data {
     my $config = $c->config->{session};
 
     # Optimize for expires:sid
-    my $expires = 0;
-    if (my ($sid) = $key =~ /^expires:(.*)/) {
-        $key     = "session:$sid";
-        $expires = 1;
+    my $want_expires = 0;
+    if ($key =~ /^expires:(.*)/) {
+        $key = "session:$1";
+        $want_expires = 1;
     }
 
-    my $session = $c->_dbic_session_obj->find($key);
+    my $session = $c->_dbic_session_resultset->find($key);
     return unless $session;
 
-    if ($expires) {
-        return $session->get_column($config->{expires_field});
-    }
-    else {
-        if (my $data = $session->get_column($config->{data_field})) {
-            return thaw(decode_base64($data));
-        }
-    }
+    return $session->get_column($config->{expires_field})
+        if $want_expires;
+
+    my $data = $session->get_column($config->{data_field});
+    return thaw(decode_base64($data));
 }
 
 sub store_session_data {
@@ -84,28 +81,22 @@ sub store_session_data {
 
     my $config = $c->config->{session};
 
-    # expires:sid keys only update the expiration time
-    if (my ($sid) = $key =~ /^expires:(.*)/) {
-        $key = "session:$sid";
-
-        my $session = $c->_dbic_session_obj->find($key);
-        return unless $session;
-
-        $session->set_column($config->{expires_field}, $c->session_expires);
-        $session->update;
+    # Optimize for expires:sid
+    my $setting_expires = 0;
+    if ($key =~ /^expires:(.*)/) {
+        $key = "session:$1";
+        $setting_expires = 1;
     }
-    else {
-        my $frozen  = encode_base64(nfreeze($data));
-        my $expires = $key =~ /^(?:session|flash):/
-            ? $c->session_expires
-            : undef;
 
-        my $session = $c->_dbic_session_obj->update_or_create({
-            $config->{id_field}      => $key,
-            $config->{data_field}    => $frozen,
-            $config->{expires_field} => $expires,
-        });
+    my %fields = (
+        $config->{id_field}      => $key,
+        $config->{expires_field} => $c->session_expires,
+    );
+    unless ($setting_expires) {
+        $fields{$config->{data_field}} = encode_base64(nfreeze($data));
     }
+
+    $c->_dbic_session_resultset->update_or_create(\%fields);
 }
 
 sub delete_session_data {
@@ -115,7 +106,7 @@ sub delete_session_data {
 
     my $config = $c->config->{session};
 
-    $c->_dbic_session_obj->search({
+    $c->_dbic_session_resultset->search({
         $config->{id_field} => $key,
     })->delete_all;
 }
@@ -125,7 +116,7 @@ sub delete_expired_sessions {
 
     my $config = $c->config->{session};
 
-    $c->_dbic_session_obj->search({
+    $c->_dbic_session_resultset->search({
         $config->{expires_field} => { '<', time() },
     })->delete_all;
 }
