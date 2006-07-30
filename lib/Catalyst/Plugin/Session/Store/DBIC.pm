@@ -92,13 +92,13 @@ sub setup_finished {
     my $dbic_class = $config->{dbic_class};
     my $model      = $c->model($dbic_class) || $c->comp($dbic_class);
 
-    my $obj = ref $model ? $model
+    my $rs = ref $model ? $model
         : $dbic_class->can('resultset_instance') ? $dbic_class->resultset_instance
         : $dbic_class;
-    $c->_dbic_session_resultset($obj);
+    $c->_dbic_session_resultset($rs);
 
     # Try to determine id_field if it isn't set
-    my @primaries = $obj->result_source->primary_columns;
+    my @primaries = $rs->result_source->primary_columns;
     if (scalar @primaries > 1 and not exists $config->{id_field}) {
         Catalyst::Exception->throw(
             message => __PACKAGE__ . qq/: Primary key consists of more than one column; please set id_field manually/
