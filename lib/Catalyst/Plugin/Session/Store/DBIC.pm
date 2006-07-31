@@ -140,9 +140,12 @@ sub get_session_data {
     return unless $session;
 
     my $data = $session->get_column($field);
-    return $data if $want_expires;
-
-    return thaw(decode_base64($data));
+    if ($want_expires) {
+        return $data;
+    }
+    elsif ($data) {
+        return thaw(decode_base64($data));
+    }
 }
 
 =head2 store_session_data
