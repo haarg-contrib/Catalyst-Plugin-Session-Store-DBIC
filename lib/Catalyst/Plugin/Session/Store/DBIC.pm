@@ -165,15 +165,11 @@ sub store_session_data {
         $setting_expires = 1;
     }
 
-    my %fields = (
+    $c->_dbic_session_resultset->update_or_create({
         $config->{id_field}      => $key,
         $config->{expires_field} => $c->session_expires,
-    );
-    unless ($setting_expires) {
-        $fields{$config->{data_field}} = encode_base64(nfreeze($data));
-    }
-
-    $c->_dbic_session_resultset->update_or_create(\%fields);
+        $config->{data_field}    => $setting_expires ? '' : encode_base64(nfreeze($data)),
+    });
 }
 
 =head2 delete_session_data
