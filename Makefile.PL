@@ -10,7 +10,7 @@ WriteMakefile(
     PREREQ_PM     => {
         'Catalyst'                         => '5.65',  # For setup_finished
         'Catalyst::Exception'              => 0,
-        'Catalyst::Plugin::Session'        => 0,
+        'Catalyst::Plugin::Session'        => '0.08',  # For session_is_valid
         'Catalyst::Plugin::Session::Store' => 0,
         'Class::Data::Inheritable'         => 0,
         'DBIx::Class'                      => '0.05000',  # For update_or_create

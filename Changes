@@ -1,5 +1,9 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
+0.05
+        - Bump Catalyst::Plugin::Session dependency (tests use
+          session_is_valid)
+
 0.04  Sat Jul 29 23:02:27 EDT 2006
         - Catalyst::Plugin::Session 0.06 saves the session expiration
           before the sesssion, so make sure the session row is created then
