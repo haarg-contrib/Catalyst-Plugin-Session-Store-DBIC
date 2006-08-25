@@ -1,5 +1,8 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
+        - Add build_session_data to allow overriding of fields stored
+          on the sessions table
+
 0.05  Mon Jul 31 16:58:32 EDT 2006
         - Bump Catalyst::Plugin::Session dependency (tests use
           session_is_valid)

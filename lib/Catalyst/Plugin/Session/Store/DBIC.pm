@@ -159,6 +159,22 @@ is stored alongside the session itself.
 sub store_session_data {
     my ($c, $key, $data) = @_;
 
+    my %fields = $c->build_session_data($key, $data);
+    $c->_dbic_session_resultset->update_or_create(\%fields);
+}
+
+=head2 build_session_data
+
+Build the hash used for storing the session in the backend store.
+This is simply a list of key-value pairs corresponding to the columns
+on your session table.
+
+=cut
+
+sub build_session_data {
+    my ($c, $key, $data) = @_;
+
+    my %fields = $c->NEXT::build_session_data($key, $data);
     my $config = $c->config->{session};
 
     # Optimize for expires:sid
@@ -168,9 +184,8 @@ sub store_session_data {
         $setting_expires = 1;
     }
 
-    my %fields = (
-        $config->{id_field} => $key,
-    );
+    $fields{$config->{id_field}} = $key;
+
     if ($setting_expires) {
         $fields{$config->{expires_field}} = $c->session_expires;
     }
@@ -178,7 +193,7 @@ sub store_session_data {
         $fields{$config->{data_field}} = encode_base64(nfreeze($data));
     }
 
-    $c->_dbic_session_resultset->update_or_create(\%fields);
+    return %fields;
 }
 
 =head2 delete_session_data
