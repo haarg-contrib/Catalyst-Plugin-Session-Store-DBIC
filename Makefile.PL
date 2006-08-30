@@ -8,17 +8,15 @@ WriteMakefile(
     VERSION_FROM  => 'lib/Catalyst/Plugin/Session/Store/DBIC.pm',
     ABSTRACT_FROM => 'lib/Catalyst/Plugin/Session/Store/DBIC.pm',
     PREREQ_PM     => {
-        'Catalyst'                         => '5.65',  # For setup_finished
-        'Catalyst::Exception'              => 0,
-        'Catalyst::Plugin::Session'        => '0.08',  # For session_is_valid
-        'Catalyst::Plugin::Session::Store' => 0,
-        'Class::Data::Inheritable'         => 0,
-        'DBIx::Class'                      => '0.05000',  # For update_or_create
-        'FindBin'                          => 0,
-        'MIME::Base64'                     => 0,
-        'NEXT'                             => 0,
-        'Storable'                         => 0,
-        'Test::More'                       => 0,
+        'Catalyst'                                   => '5.65',  # For setup_finished
+        'Catalyst::Exception'                        => 0,
+        'Catalyst::Plugin::Session::Store::Delegate' => 0,
+        'DBIx::Class'                                => '0.07000',  # For find with unique constraints
+        'MIME::Base64'                               => 0,
+        'NEXT'                                       => 0,
+        'Storable'                                   => 0,
+        'FindBin'                                    => 0,
+        'Test::More'                                 => 0,
     },
     dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean         => { FILES => 'Catalyst-Plugin-Session-Store-DBIC-* MANIFEST META.yml README' },

@@ -17,7 +17,7 @@ BEGIN {
     eval { require Test::WWW::Mechanize::Catalyst }
         or plan skip_all => "Test::WWW::Mechanize::Catalyst is required for this test";
 
-    plan tests => 8;
+    plan tests => 12;
 
     $ENV{TESTAPP_DB_FILE} = "$FindBin::Bin/session.db";
 
@@ -48,19 +48,27 @@ my $key   = 'db';
 my $value = scalar localtime;
 
 # Setup session
-$mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'request to set session value ok');
+$mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'request to set session value');
 $mech->content_is('ok', 'set session value');
 
+# Setup flash
+$mech->get_ok("http://localhost/flash/setup?key=$key&value=$value", 'request to set flash value');
+$mech->content_is('ok', 'set flash value');
+
+# Check flash
+$mech->get_ok("http://localhost/flash/output?key=$key", 'request to get flash value');
+$mech->content_is($value, 'got flash value back');
+
 # Check session
-$mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value ok');
+$mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value');
 $mech->content_is($value, 'got session value back');
 
 # Delete session
-$mech->get_ok('http://localhost/session/delete', 'request to delete session ok');
+$mech->get_ok('http://localhost/session/delete', 'request to delete session');
 $mech->content_is('ok', 'deleted session');
 
 # Delete expired sessions
-$mech->get_ok('http://localhost/session/delete_expired', 'request to delete expired sessions ok');
+$mech->get_ok('http://localhost/session/delete_expired', 'request to delete expired sessions');
 $mech->content_is('ok', 'deleted expired sessions');
 
 # Clean up
