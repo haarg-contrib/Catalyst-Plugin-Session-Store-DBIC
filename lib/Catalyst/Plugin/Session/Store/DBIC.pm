@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use base qw/Catalyst::Plugin::Session::Store::Delegate/;
 use Catalyst::Exception;
+use Catalyst::Plugin::Session::Store::DBIC::Delegate;
 use MIME::Base64 ();
 use NEXT;
 use Storable ();
@@ -59,26 +60,6 @@ that instead.
 
 =head1 METHODS
 
-=head2 setup_session
-
-Verify that the configuration is valid, i.e. that a value for the
-C<dbic_class> configuration parameter is provided.
-
-=cut
-
-sub setup_session {
-    my $c = shift;
-
-    $c->NEXT::setup_session(@_);
-
-    my $dbic_class = $c->config->{session}->{dbic_class};
-    Catalyst::Exception->throw(
-        message => __PACKAGE__ . qq/: You must provide a value for dbic_class/
-    ) unless $dbic_class;
-
-    $c->config->{session}->{model} = $dbic_class;
-}
-
 =head2 setup_finished
 
 Hook into the configured session class.
@@ -90,27 +71,76 @@ sub setup_finished {
 
     return $c->NEXT::setup_finished unless @_;
 
-    my $config = $c->config->{session};
-
     # Try to determine id_field if it isn't set
-    my $model = $c->session_store_model;
-    my $rs = ref $model ? $model
-        : $model->can('resultset_instance') ? $model->resultset_instance
-        : $model;
+    unless ($c->config->{session}->{id_field}) {
+        my $model = $c->session_store_model;
+        my $rs = ref $model ? $model
+            : $model->can('resultset_instance') ? $model->resultset_instance
+            : $model;
+        my @primary_columns = $rs->result_source->primary_columns;
 
-    my @primaries = $rs->result_source->primary_columns;
-    if (scalar @primaries > 1 and not exists $config->{id_field}) {
         Catalyst::Exception->throw(
             message => __PACKAGE__ . qq/: Primary key consists of more than one column; please set id_field manually/
-        );
+        ) if @primary_columns > 1;
+
+        $c->config->{session}->{id_field} = $primary_columns[0];
     }
 
-    # Set default values
-    $config->{id_field}      ||= $primaries[0] || 'id';
-    $config->{data_field}    ||= 'session_data';
-    $config->{expires_field} ||= 'expires';
-
     $c->NEXT::setup_finished(@_);
+}
+
+=head2 session_store_dbic_class
+
+Return the L<DBIx::Class> class name to be passed to C<< $c->model >>.
+Defaults to C<DBIC::Session>.
+
+=cut
+
+sub session_store_dbic_class {
+    shift->config->{session}->{dbic_class} || 'DBIC::Session';
+}
+
+=head2 session_store_dbic_id_field
+
+Return the configured ID field name.  Defaults to C<id>.
+
+=cut
+
+sub session_store_dbic_id_field {
+    shift->config->{session}->{id_field} || 'id';
+}
+
+=head2 session_store_dbic_data_field
+
+Return the configured data field name.  Defaults to C<session_data>.
+
+=cut
+
+sub session_store_dbic_data_field {
+    shift->config->{session}->{data_field} || 'session_data';
+}
+
+=head2 session_store_dbic_expires_field
+
+Return the configured expires field name.  Defaults to C<expires>.
+
+=cut
+
+sub session_store_dbic_expires_field {
+    shift->config->{session}->{expires_field} || 'expires';
+}
+
+=head2 session_store_model
+
+Return the model used to find a session.
+
+=cut
+
+sub session_store_model {
+    my ($c, $id) = @_;
+
+    my $dbic_class = $c->session_store_dbic_class;
+    $c->model($dbic_class, $id) or die "Couldn't find a model named $dbic_class";
 }
 
 =head2 get_session_store_delegate
@@ -123,21 +153,10 @@ found, one is automatically created.
 sub get_session_store_delegate {
     my ($c, $id) = @_;
 
-    $c->session_store_model($id)->find_or_create({
-        $c->config->{session}->{id_field} => $id,
+    Catalyst::Plugin::Session::Store::DBIC::Delegate->new({
+        model    => $c->session_store_model($id),
+        id_field => $c->session_store_dbic_id_field,
     });
-}
-
-=head2 finalize_session_delegate
-
-If the session needs to be updated in the backend store, do so.
-
-=cut
-
-sub finalize_session_delegate {
-    my ($c, $obj) = @_;
-
-    $obj->update if $obj->in_storage;
 }
 
 =head2 session_store_delegate_key_to_accessor
@@ -148,52 +167,28 @@ name.
 =cut
 
 sub session_store_delegate_key_to_accessor {
-    my ($c, $key, $operation) = @_;
-    my ($id, $field, @args) = $c->NEXT::session_store_delegate_key_to_accessor($key, $operation);
+    my $c = shift;
+    my $key = $_[0];
+    my ($field, @args) = $c->NEXT::session_store_delegate_key_to_accessor(@_);
 
-    $id = ($key =~ /^flash/ ? "flash:$id" : "session:$id");
+    my ($type) = ($key =~ /^(\w+):/);
 
-    my $config = $c->config->{session};
-    $field = $config->{id_field}      if $field eq 'id';
-    $field = $config->{expires_field} if $field eq 'expires';
-    $field = $config->{data_field}    if $field eq 'session' or $field eq 'flash';
+    $field = $c->session_store_dbic_id_field      if $field eq 'id';
+    $field = $c->session_store_dbic_expires_field if $field eq 'expires';
+    $field = $c->session_store_dbic_data_field    if $field eq 'session' or $field eq 'flash';
 
-    return ($id, $field, @args);
-}
+    my $accessor = sub { shift->$type($key)->$field(@_) };
 
-=head2 get_session_data
-
-Return data for the specified session key.
-
-=cut
-
-sub get_session_data {
-    my ($c, $key) = @_;
-    my ($id, $field, @args) = $c->session_store_delegate_key_to_accessor($key, 'get');
-
-    my $value = $c->NEXT::get_session_data($key);
-    if (defined $value and $field eq $c->config->{session}->{data_field}) {
-        $value = Storable::thaw(MIME::Base64::decode($value));
+    if ($field eq $c->session_store_dbic_data_field) {
+        @args = map { MIME::Base64::encode(Storable::nfreeze($_ || '')) } @args;
+        $accessor = sub {
+            my $value = shift->$type($key)->$field(@_);
+            return unless defined $value;
+            return Storable::thaw(MIME::Base64::decode($value));
+        };
     }
 
-    return $value;
-}
-
-=head2 store_session_data
-
-Store the specified data for the specified session.
-
-=cut
-
-sub store_session_data {
-    my ($c, $key, $value) = @_;
-    my ($id, $field, @args) = $c->session_store_delegate_key_to_accessor($key, 'set');
-
-    if ($field eq $c->config->{session}->{data_field}) {
-        $value = MIME::Base64::encode(Storable::nfreeze($value));
-    }
-
-    $c->NEXT::store_session_data($key, $value);
+    return ($accessor, @args);
 }
 
 =head2 delete_session_data
@@ -204,10 +199,12 @@ Delete the specified session from the backend store.
 
 sub delete_session_data {
     my ($c, $key) = @_;
-    my ($id, $field, @args) = $c->session_store_delegate_key_to_accessor($key, 'delete');
 
-    my $delegate = $c->session_store_delegate($id);
-    $delegate->delete if $delegate->in_storage;
+    return if $key =~ /^expires/;
+
+    $c->session_store_model->search({
+        $c->session_store_dbic_id_field => $key,
+    })->delete;
 }
 
 =head2 delete_expired_sessions
@@ -220,7 +217,7 @@ sub delete_expired_sessions {
     my $c = shift;
 
     $c->session_store_model->search({
-        $c->config->{session}->{expires_field} => { '<', time() },
+        $c->session_store_dbic_expires_field => { '<', time() },
     })->delete;
 }
 
@@ -314,6 +311,9 @@ Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>
 
 =item * David Kamholz, for most of the testing code (from
         L<Catalyst::Plugin::Authentication::Store::DBIC>)
+
+=item * Yuval Kogman, for assistance in converting to
+        L<Catalyst::Plugin::Session::Store::Delegate>
 
 =back
 
