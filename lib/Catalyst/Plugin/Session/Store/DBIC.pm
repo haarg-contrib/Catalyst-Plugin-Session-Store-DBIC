@@ -9,7 +9,7 @@ use MIME::Base64 ();
 use NEXT;
 use Storable ();
 
-our $VERSION = '0.06_01';
+our $VERSION = '0.06';
 
 =head1 NAME
 
