@@ -200,6 +200,7 @@ Delete the specified session from the backend store.
 sub delete_session_data {
     my ($c, $key) = @_;
 
+    # expires is stored on the session row for compatibility with Store::DBI
     return if $key =~ /^expires/;
 
     $c->session_store_model->search({
