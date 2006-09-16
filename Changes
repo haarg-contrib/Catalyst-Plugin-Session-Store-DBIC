@@ -1,6 +1,6 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
-0.06  Sat Sep 16 15:36:32 EDT 2006
+0.06  Sat Sep 16 15:38:32 EDT 2006
         - Convert to Catalyst::Plugin::Session::Store::Delegate (with
           help from nothingmuch)
 
