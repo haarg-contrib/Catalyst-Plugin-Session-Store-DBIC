@@ -7,7 +7,7 @@ use strict;
 use warnings;
 
 __PACKAGE__->table('sessions');
-__PACKAGE__->add_columns(qw/id data expires/);
+__PACKAGE__->add_columns('id', 'data', { size => 200 }, 'expires');
 __PACKAGE__->set_primary_key('id');
 
 1;

@@ -20,7 +20,7 @@ BEGIN {
     eval { require Catalyst::Model::DBIC::Schema }
         or plan skip_all => "Catalyst::Model::DBIC::Schema is required for this test";
 
-    plan tests => 12;
+    plan tests => 15;
 
     $ENV{TESTAPP_DB_FILE} = "$FindBin::Bin/session.db";
 
@@ -62,6 +62,12 @@ $mech->content_is($value, 'got session value back');
 # Check session
 $mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value');
 $mech->content_is($value, 'got session value back');
+
+# Exceed our session storage capactity
+$value = "blah" x 200;
+$mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'exceeding storage capacity');
+$mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value');
+$mech->content_lacks($value, 'value is not set');
 
 # Delete session
 $mech->get_ok('http://localhost/session/delete', 'request to delete session');
