@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use base qw/Class::Accessor::Fast/;
 use Carp qw/carp/;
+use Scalar::Util qw/blessed/;
 
 __PACKAGE__->mk_accessors(qw/model id_field data_field _session_row _flash_row/);
 
@@ -31,7 +32,7 @@ sub session {
     my $row = $self->_session_row;
 
     unless ($row) {
-        $row = $self->model->find_or_create({ $self->id_field => $key });
+        $row = $self->_load_row($key);
         $self->_session_row($row);
     }
 
@@ -50,8 +51,35 @@ sub flash {
     my $row = $self->_flash_row;
 
     unless ($row) {
-        $row = $self->model->find_or_create({ $self->id_field => $key });
+        $row = $self->_load_row($key);
         $self->_flash_row($row);
+    }
+
+    return $row;
+}
+
+=head2 _load_row
+
+Load the specified session or flash row from the database. This is a
+wrapper around L<DBIx::Class::ResultSet/find_or_create> to add support
+for transactions.
+
+=cut
+
+sub _load_row {
+    my ($self, $key) = @_;
+
+    my $load_sub = sub {
+        return $self->model->find_or_create({ $self->id_field => $key })
+    };
+
+    my $row;
+    if (blessed $self->model and $self->model->can('result_source')) {
+        $row = $self->model->result_source->schema->txn_do($load_sub);
+    }
+    else {
+        # Fallback for DBIx::Class::DB
+        $row = $load_sub->();
     }
 
     return $row;
