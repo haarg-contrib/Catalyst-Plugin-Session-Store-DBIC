@@ -18,6 +18,7 @@ WriteMakefile(
         'Storable'                                   => 0,
         'FindBin'                                    => 0,
         'Test::More'                                 => 0,
+        'Test::Warn'                                 => 0,
     },
     dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean         => { FILES => 'Catalyst-Plugin-Session-Store-DBIC-* MANIFEST META.yml README' },

@@ -154,8 +154,9 @@ sub get_session_store_delegate {
     my ($c, $id) = @_;
 
     Catalyst::Plugin::Session::Store::DBIC::Delegate->new({
-        model    => $c->session_store_model($id),
-        id_field => $c->session_store_dbic_id_field,
+        model      => $c->session_store_model($id),
+        id_field   => $c->session_store_dbic_id_field,
+        data_field => $c->session_store_dbic_data_field,
     });
 }
 
@@ -179,36 +180,13 @@ sub session_store_delegate_key_to_accessor {
 
     my $accessor = sub { shift->$type($key)->$field(@_) };
 
-    my $data_field = $c->session_store_dbic_data_field;
-    if ($field eq $data_field) {
-        my @new_args;
-        my $total_size = 0;
-        foreach my $arg (@args) {
-            my $value = MIME::Base64::encode(Storable::nfreeze($arg || ''));
-            $total_size += length($value);
-            push @new_args, $value;
-        }
-
-        $DB::single = 1;
-        my $size;
-        if ($c->session_store_model->can('column_info')) {
-            # A DBIx::Class object.
-            $size = $c->session_store_model->column_info($data_field)->{size};
-        } elsif ($c->session_store_model->can('result_source')) {
-            # A DBIx::Class::ResultSet object.
-            $size = $c->session_store_model->result_source->column_info($data_field)->{size};
-        }
-        if ($size && $total_size > $size) {
-           warn "This session requires $total_size bytes of storage, but your database column '$data_field' can only store $size bytes. Cannot store session";
-           @new_args = ();
-        }
-
+    if ($field eq $c->session_store_dbic_data_field) {
+        @args = map { MIME::Base64::encode(Storable::nfreeze($_ || '')) } @args;
         $accessor = sub {
             my $value = shift->$type($key)->$field(@_);
             return unless defined $value;
             return Storable::thaw(MIME::Base64::decode($value));
         };
-        @args = @new_args;
     }
 
     return ($accessor, @args);
@@ -316,9 +294,17 @@ SHA-1 or MD5 is used, but SHA-256 will need all 72 characters.
 The C<session_data> column should be a long text field.  Session data
 is encoded using L<MIME::Base64> before being stored in the database.
 
-Note that MySQL TEXT fields only store 64KB, so if your session data 
-will exceed that size you'll want to move to MEDIUMTEXT, MEDIUMBLOB, 
-or larger.
+Note that MySQL C<TEXT> fields only store 64 kB, so if your session
+data will exceed that size you'll want to use C<MEDIUMTEXT>,
+C<MEDIUMBLOB>, or larger. If you configure your
+L<DBIx::Class::ResultSource> to include the size of the column, you
+will receive warnings for this problem:
+
+    This session requires 1180 bytes of storage, but your database
+    column 'session_data' can only store 200 bytes. Storing this
+    session may not be reliable; increase the size of your data field
+
+See L<DBIx::Class::ResultSource/add_columns> for more information.
 
 The C<expires> column stores the future expiration time of the
 session.  This may be null for per-user and flash sessions.
@@ -350,7 +336,7 @@ Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2006,2008 Daniel Westermann-Clark, all rights reserved.
+Copyright 2006-2008 Daniel Westermann-Clark, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

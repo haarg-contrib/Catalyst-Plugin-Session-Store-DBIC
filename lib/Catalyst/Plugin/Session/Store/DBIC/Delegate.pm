@@ -3,8 +3,9 @@ package Catalyst::Plugin::Session::Store::DBIC::Delegate;
 use strict;
 use warnings;
 use base qw/Class::Accessor::Fast/;
+use Carp qw/carp/;
 
-__PACKAGE__->mk_accessors(qw/model id_field _session_row _flash_row/);
+__PACKAGE__->mk_accessors(qw/model id_field data_field _session_row _flash_row/);
 
 =head1 NAME
 
@@ -82,7 +83,17 @@ sub flush {
 
     for (qw/_session_row _flash_row/) {
         my $row = $self->$_;
-        $row->update if $row and $row->in_storage;
+        next unless $row;
+
+        # Check the size if available to avoid silent trucation on e.g. MySQL
+        my $data_field = $self->data_field;
+        if (my $size = $row->result_source->column_info($data_field)->{size}) {
+            my $total_size = length($row->$data_field);
+            carp "This session requires $total_size bytes of storage, but your database column '$data_field' can only store $size bytes. Storing this session may not be reliable; increase the size of your data field"
+                if $total_size > $size;
+        }
+
+        $row->update if $row->in_storage;
     }
 
     $self->_clear_instance_data;
@@ -109,7 +120,7 @@ Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2006 Daniel Westermann-Clark, all rights reserved.
+Copyright 2006-2008 Daniel Westermann-Clark, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

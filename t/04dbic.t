@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use FindBin;
 use Test::More;
+use Test::Warn;
 
 use lib "$FindBin::Bin/lib";
 
@@ -17,7 +18,7 @@ BEGIN {
     eval { require Test::WWW::Mechanize::Catalyst }
         or plan skip_all => "Test::WWW::Mechanize::Catalyst is required for this test";
 
-    plan tests => 15;
+    plan tests => 14;
 
     $ENV{TESTAPP_DB_FILE} = "$FindBin::Bin/session.db";
 
@@ -65,9 +66,9 @@ $mech->content_is($value, 'got session value back');
 
 # Exceed our session storage capactity
 $value = "blah" x 200;
-$mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'exceeding storage capacity');
-$mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value');
-$mech->content_lacks($value, 'value is not set');
+warning_like {
+    $mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'exceeding storage capacity');
+} qr/^This session requires \d+ bytes of storage, but your database column 'data' can only store 200 bytes. Storing this session may not be reliable; increase the size of your data field/;
 
 # Delete session
 $mech->get_ok('http://localhost/session/delete', 'request to delete session');
