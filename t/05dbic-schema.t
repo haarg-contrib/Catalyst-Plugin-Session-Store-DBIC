@@ -68,7 +68,7 @@ $mech->content_is($value, 'got session value back');
 $value = "blah" x 200;
 warning_like {
     $mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'exceeding storage capacity');
-} qr/This session requires \d+ bytes of storage, but your database column 'data' can only store 200 bytes. Storing this session may not be reliable; increase the size of your data field/;
+} qr/This session requires \d+ bytes of storage, but your database column 'data' can only store 200 bytes. Storing this session may not be reliable; increase the size of your data field/, 'warning thrown as expected';
 
 # Delete session
 $mech->get_ok('http://localhost/session/delete', 'request to delete session');
