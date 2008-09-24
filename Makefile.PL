@@ -16,9 +16,9 @@ WriteMakefile(
         'DBIx::Class'                                => '0.07000',  # For find with unique constraints
         'MIME::Base64'                               => 0,
         'NEXT'                                       => 0,
+        'Scalar::Util'                               => 0,
         'Storable'                                   => 0,
         'FindBin'                                    => 0,
-        'Scalar::Util'                               => 0,
         'Test::More'                                 => 0,
         'Test::Warn'                                 => 0,
     },
