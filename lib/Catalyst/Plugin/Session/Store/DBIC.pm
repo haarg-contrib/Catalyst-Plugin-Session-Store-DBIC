@@ -9,7 +9,7 @@ use MIME::Base64 ();
 use NEXT;
 use Storable ();
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 NAME
 
@@ -184,7 +184,7 @@ sub session_store_delegate_key_to_accessor {
         @args = map { MIME::Base64::encode(Storable::nfreeze($_ || '')) } @args;
         $accessor = sub {
             my $value = shift->$type($key)->$field(@_);
-            return unless defined $value;
+            return unless $value;
             return Storable::thaw(MIME::Base64::decode($value));
         };
     }
