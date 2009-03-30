@@ -25,7 +25,7 @@ BEGIN {
     $ENV{TESTAPP_CONFIG} = {
         name    => 'TestApp',
         session => {
-            dbic_class    => 'TestApp::Model::DBIC::Session',
+            dbic_class    => 'DBIC::Session',
             expires       => 3600,
             id_field      => 'id',
             data_field    => 'data',
