@@ -6,7 +6,7 @@ use base qw/Catalyst::Plugin::Session::Store::Delegate/;
 use Catalyst::Exception;
 use Catalyst::Plugin::Session::Store::DBIC::Delegate;
 use MIME::Base64 ();
-use NEXT;
+use MRO::Compat;
 use Storable ();
 
 our $VERSION = '0.08';
@@ -69,7 +69,7 @@ Hook into the configured session class.
 sub setup_finished {
     my $c = shift;
 
-    return $c->NEXT::setup_finished unless @_;
+    return $c->next::method unless @_;
 
     # Try to determine id_field if it isn't set
     unless ($c->config->{session}->{id_field}) {
@@ -86,7 +86,7 @@ sub setup_finished {
         $c->config->{session}->{id_field} = $primary_columns[0];
     }
 
-    $c->NEXT::setup_finished(@_);
+    $c->next::method(@_);
 }
 
 =head2 session_store_dbic_class
@@ -170,7 +170,7 @@ name.
 sub session_store_delegate_key_to_accessor {
     my $c = shift;
     my $key = $_[0];
-    my ($field, @args) = $c->NEXT::session_store_delegate_key_to_accessor(@_);
+    my ($field, @args) = $c->next::method(@_);
 
     my ($type) = ($key =~ /^(\w+):/);
 
