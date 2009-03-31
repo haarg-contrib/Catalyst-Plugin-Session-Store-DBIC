@@ -1,5 +1,10 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
+0.09  Wed Mar 31 16:35:52 CEST 2009
+        - Port from NEXT to MRO::Compat (Florian Ragwitz).
+        - Remove tests relying on the deprecated DBIx::Class::DB
+          (Florian Ragwitz).
+
 0.08  Wed Nov 26 10:02:52 EST 2008
         - Workaround possible errors with Storable::thaw and empty
           strings (thanks to kevin montuori for suggesting a fix)
