@@ -11,7 +11,7 @@ WriteMakefile(
         'Carp'                                       => 0,
         'Catalyst'                                   => '5.65',  # For setup_finished
         'Catalyst::Exception'                        => 0,
-        'Catalyst::Plugin::Session::Store::Delegate' => '0.02',
+        'Catalyst::Plugin::Session::Store::Delegate' => '0.04',
         'Class::Accessor::Fast'                      => 0,
         'DBIx::Class'                                => '0.07000',  # For find with unique constraints
         'MIME::Base64'                               => 0,
