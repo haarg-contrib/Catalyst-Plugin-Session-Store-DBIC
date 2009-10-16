@@ -1,5 +1,8 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
+0.11  Fri Oct 16 15:04:07 CEST 2009
+        - Convert to new session config key.
+
 0.10  Tue Jul  7 13:00:27 CEST 2009
         - Depend on a recent Store::Delegate for the NEXT -> MRO::Compat
           switch.
