@@ -41,7 +41,7 @@ Catalyst::Plugin::Session::Store::DBIC - Store your sessions via DBIx::Class
 
     __PACKAGE__->config(
         # ... other items ...
-        session => {
+        'Plugin::Session' => {
             dbic_class => 'DBIC::Session',  # Assuming MyApp::Model::DBIC
             expires    => 3600,
         },
@@ -72,7 +72,7 @@ sub setup_finished {
     return $c->next::method unless @_;
 
     # Try to determine id_field if it isn't set
-    unless ($c->config->{session}->{id_field}) {
+    unless ($c->_session_plugin_config->{id_field}) {
         my $model = $c->session_store_model;
         my $rs = ref $model ? $model
             : $model->can('resultset_instance') ? $model->resultset_instance
@@ -83,7 +83,7 @@ sub setup_finished {
             message => __PACKAGE__ . qq/: Primary key consists of more than one column; please set id_field manually/
         ) if @primary_columns > 1;
 
-        $c->config->{session}->{id_field} = $primary_columns[0];
+        $c->_session_plugin_config->{id_field} = $primary_columns[0];
     }
 
     $c->next::method(@_);
@@ -97,7 +97,7 @@ Defaults to C<DBIC::Session>.
 =cut
 
 sub session_store_dbic_class {
-    shift->config->{session}->{dbic_class} || 'DBIC::Session';
+    shift->_session_plugin_config->{dbic_class} || 'DBIC::Session';
 }
 
 =head2 session_store_dbic_id_field
@@ -107,7 +107,7 @@ Return the configured ID field name.  Defaults to C<id>.
 =cut
 
 sub session_store_dbic_id_field {
-    shift->config->{session}->{id_field} || 'id';
+    shift->_session_plugin_config->{id_field} || 'id';
 }
 
 =head2 session_store_dbic_data_field
@@ -117,7 +117,7 @@ Return the configured data field name.  Defaults to C<session_data>.
 =cut
 
 sub session_store_dbic_data_field {
-    shift->config->{session}->{data_field} || 'session_data';
+    shift->_session_plugin_config->{data_field} || 'session_data';
 }
 
 =head2 session_store_dbic_expires_field
@@ -127,7 +127,7 @@ Return the configured expires field name.  Defaults to C<expires>.
 =cut
 
 sub session_store_dbic_expires_field {
-    shift->config->{session}->{expires_field} || 'expires';
+    shift->_session_plugin_config->{expires_field} || 'expires';
 }
 
 =head2 session_store_model
@@ -226,7 +226,7 @@ sub delete_expired_sessions {
 =head1 CONFIGURATION
 
 The following parameters should be placed in your application
-configuration under the C<session> key.
+configuration under the C<Plugin::Session> key.
 
 =head2 dbic_class
 
