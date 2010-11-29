@@ -22,6 +22,9 @@ WriteMakefile(
         'Test::More'                                 => 0,
         'Test::Warn'                                 => 0,
     },
+    META_MERGE              => {
+        repository  =>      'http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Plugin-Session-Store-DBIC/',
+    },
     dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean         => { FILES => 'Catalyst-Plugin-Session-Store-DBIC-* MANIFEST META.yml README' },
 );
