@@ -1,5 +1,10 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
+0.12  Mon Aug  1 10:15:00 EDT 2011
+        - Changed a test case to be less picky about the actual text captured
+          from warnings.  This was done to support some changes introduced by
+          the Catalyst -> PSGI port.
+
 0.11  Fri Oct 16 15:04:07 CEST 2009
         - Convert to new session config key.
 

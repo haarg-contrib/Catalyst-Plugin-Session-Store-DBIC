@@ -20,7 +20,7 @@ WriteMakefile(
         'Storable'                                   => 0,
         'FindBin'                                    => 0,
         'Test::More'                                 => 0,
-        'Test::Warn'                                 => 0,
+        'Test::Warn'                                 => '0.20', # so we get warnings_exist
     },
     META_MERGE              => {
         repository  =>      'http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Plugin-Session-Store-DBIC/',

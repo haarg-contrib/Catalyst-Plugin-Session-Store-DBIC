@@ -66,7 +66,7 @@ $mech->content_is($value, 'got session value back');
 
 # Exceed our session storage capactity
 $value = "blah" x 200;
-warning_like {
+warnings_exist {
     $mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'exceeding storage capacity');
 } qr/This session requires \d+ bytes of storage, but your database column 'data' can only store 200 bytes. Storing this session may not be reliable; increase the size of your data field/, 'warning thrown as expected';
 
