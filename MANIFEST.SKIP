@@ -6,6 +6,7 @@
 \B\.git\b
 
 # MakeMaker-generated files and directories
+^MYMETA.yml$
 ^MANIFEST\.
 ^MakeMaker-\d
 ^Makefile$
