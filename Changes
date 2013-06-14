@@ -1,4 +1,6 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
+
+0.13  Fri Jun 14 17:30:00 BST 2013
     - Don't use %ENV for passing data structures to tests.
 	  This fixes the tests on Perl 5.18, which stringifies %ENV values
  	  immediately. RT#86148
