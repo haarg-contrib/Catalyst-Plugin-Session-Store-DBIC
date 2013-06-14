@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Catalyst;
 
-__PACKAGE__->config($ENV{TESTAPP_CONFIG});
-__PACKAGE__->setup(@{ $ENV{TESTAPP_PLUGINS} });
+__PACKAGE__->config($TestApp::CONFIG);
+__PACKAGE__->setup(@{ $TestApp::PLUGINS });
 
 1;

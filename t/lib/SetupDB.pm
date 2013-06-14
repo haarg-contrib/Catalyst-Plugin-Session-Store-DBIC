@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 # Create the database
-my $db_file = $ENV{TESTAPP_DB_FILE};
+my $db_file = $TestApp::DB_FILE;
 unlink $db_file if -e $db_file;
 
 my $dbh = DBI->connect("dbi:SQLite:$db_file") or die $DBI::errstr;

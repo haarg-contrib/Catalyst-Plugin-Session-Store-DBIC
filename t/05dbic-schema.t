@@ -23,9 +23,9 @@ BEGIN {
 
     plan tests => 14;
 
-    $ENV{TESTAPP_DB_FILE} = "$FindBin::Bin/session.db";
+    $TestApp::DB_FILE = "$FindBin::Bin/session.db";
 
-    $ENV{TESTAPP_CONFIG} = {
+    $TestApp::CONFIG = {
         name    => 'TestApp',
         session => {
             dbic_class => 'DBICSchema::Session',
@@ -33,7 +33,7 @@ BEGIN {
         },
     };
 
-    $ENV{TESTAPP_PLUGINS} = [qw/
+    $TestApp::PLUGINS = [qw/
         Session
         Session::State::Cookie
         Session::Store::DBIC
@@ -79,4 +79,4 @@ $mech->get_ok('http://localhost/session/delete_expired', 'request to delete expi
 $mech->content_is('ok', 'deleted expired sessions');
 
 # Clean up
-unlink $ENV{TESTAPP_DB_FILE};
+unlink $TestApp::DB_FILE;

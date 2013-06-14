@@ -6,7 +6,7 @@ eval { require Catalyst::Model::DBIC::Schema }; return 1 if $@;
 use strict;
 use warnings;
 
-our $db_file = $ENV{TESTAPP_DB_FILE};
+our $db_file = $TestApp::DB_FILE;
 
 __PACKAGE__->config(
     schema_class => 'TestApp::Schema',
