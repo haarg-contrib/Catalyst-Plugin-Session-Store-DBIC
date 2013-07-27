@@ -113,7 +113,7 @@ sub flush {
         my $row = $self->$_;
         next unless $row;
 
-        # Check the size if available to avoid silent trucation on e.g. MySQL
+        # Check the size if available to avoid silent truncation on e.g. MySQL
         my $data_field = $self->data_field;
         if (my $size = $row->result_source->column_info($data_field)->{size}) {
             my $total_size = length($row->$data_field);
