@@ -23,7 +23,9 @@ WriteMakefile(
         'Test::Warn'                                 => '0.20', # so we get warnings_exist
     },
     META_MERGE              => {
-        repository  =>      'http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Plugin-Session-Store-DBIC/',
+        resources => {
+            repository  =>      'http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Plugin-Session-Store-DBIC/',
+        },
     },
     dist          => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean         => { FILES => 'Catalyst-Plugin-Session-Store-DBIC-* MANIFEST META.yml README' },
