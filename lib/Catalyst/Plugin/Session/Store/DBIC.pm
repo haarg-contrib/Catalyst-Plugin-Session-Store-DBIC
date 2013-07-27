@@ -9,7 +9,7 @@ use MIME::Base64 ();
 use MRO::Compat;
 use Storable ();
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =head1 NAME
 

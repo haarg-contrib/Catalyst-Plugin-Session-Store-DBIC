@@ -1,5 +1,6 @@
 Revision history for Catalyst-Plugin-Session-Store-DBIC
 
+0.14  Sat Jul 27 12:29:00 PST 2013
    - Fix repository metadaa. RT#87249
 
 0.13  Fri Jun 14 17:30:00 BST 2013
