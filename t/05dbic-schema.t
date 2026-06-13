@@ -15,8 +15,6 @@ use Test::Warn;
 use lib "$FindBin::Bin/lib";
 
 BEGIN {
-    plan tests => 21;
-
     $TestApp::DB_FILE = "$FindBin::Bin/session.db";
 
     $TestApp::CONFIG = {
@@ -84,3 +82,5 @@ $mech->content_is('ok', 'deleted expired sessions');
 
 # Clean up
 unlink $TestApp::DB_FILE;
+
+done_testing;

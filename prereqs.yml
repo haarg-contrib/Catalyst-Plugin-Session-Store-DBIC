@@ -14,7 +14,7 @@ runtime:
 test:
   requires:
     FindBin:                0
-    Test::More:             0
+    Test::More:             0.88
     Test::Needs:            0
     Test::Warn:             0.20 # so we get warnings_exist
 develop:
