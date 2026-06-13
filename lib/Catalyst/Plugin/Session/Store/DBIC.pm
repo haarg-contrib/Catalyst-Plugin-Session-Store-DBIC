@@ -8,6 +8,7 @@ use Catalyst::Plugin::Session::Store::DBIC::Delegate;
 use MIME::Base64 ();
 use MRO::Compat;
 use Storable ();
+use Carp qw(croak);
 
 # VERSION
 
@@ -54,7 +55,7 @@ sub session_store_model {
     my ($c, $id) = @_;
 
     my $dbic_class = $c->session_store_dbic_class;
-    $c->model($dbic_class, $id) or die "Couldn't find a model named $dbic_class";
+    $c->model($dbic_class, $id) or croak "Couldn't find a model named $dbic_class";
 }
 
 sub get_session_store_delegate {
