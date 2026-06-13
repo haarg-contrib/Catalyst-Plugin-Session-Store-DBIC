@@ -10,15 +10,10 @@ jobs:
     name: Calculate Perl Versions
     steps:
       - uses: actions/checkout@v6
-      - name: Extract perl dependecy
-        id: prereqs
-        uses: perl-actions/get-prereqs@v2
-        with:
-          sources: prereqs.yml
       - id: perl-versions
         uses: perl-actions/perl-versions@v2
         with:
-          since-perl: ${{ steps.prereqs.outputs.perl }}
+          since-perl: 5.14
           with-devel: true
       - id: perl-images
         uses: actions/github-script@v9
