@@ -10,7 +10,7 @@ use Test::Needs qw(
 
 use FindBin;
 use Test::More;
-use Test::Warn;
+use Test::Warnings qw(:all :no_end_test);
 
 use lib "$FindBin::Bin/lib";
 
@@ -68,9 +68,9 @@ $mech->content_is($value, 'got session value back');
 
 # Exceed our session storage capactity
 $value = "blah" x 200;
-warnings_exist {
+like warning {
     $mech->get_ok("http://localhost/session/setup?key=$key&value=$value", 'exceeding storage capacity');
-} qr/This session requires \d+ bytes of storage, but your database column 'data' can only store 200 bytes. Storing this session may not be reliable; increase the size of your data field/, 'warning thrown as expected';
+}, qr/This session requires \d+ bytes of storage, but your database column 'data' can only store 200 bytes. Storing this session may not be reliable; increase the size of your data field/, 'warning thrown as expected';
 
 # Delete session
 $mech->get_ok('http://localhost/session/delete', 'request to delete session');
