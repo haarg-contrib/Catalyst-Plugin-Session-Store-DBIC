@@ -1,5 +1,13 @@
 use strict;
 use warnings;
+
+use Test::Needs qw(
+    DBD::SQLite
+    Catalyst::Model::DBIC::Schema
+    Catalyst::Plugin::Session::State::Cookie
+    Test::WWW::Mechanize::Catalyst
+);
+
 use FindBin;
 use Test::More;
 use Test::Warn;
@@ -7,18 +15,6 @@ use Test::Warn;
 use lib "$FindBin::Bin/lib";
 
 BEGIN {
-    eval { require DBD::SQLite }
-        or plan skip_all => "DBD::SQLite is required for this test";
-
-    eval { require Catalyst::Plugin::Session::State::Cookie }
-        or plan skip_all => "Catalyst::Plugin::Session::State::Cookie is required for this test";
-
-    eval { require Test::WWW::Mechanize::Catalyst }
-        or plan skip_all => "Test::WWW::Mechanize::Catalyst is required for this test";
-
-    eval { require Catalyst::Model::DBIC::Schema }
-        or plan skip_all => "Catalyst::Model::DBIC::Schema is required for this test";
-
     plan tests => 21;
 
     $TestApp::DB_FILE = "$FindBin::Bin/session.db";

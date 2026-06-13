@@ -15,4 +15,11 @@ test:
   requires:
     FindBin:                0
     Test::More:             0
+    Test::Needs:            0
     Test::Warn:             0.20 # so we get warnings_exist
+develop:
+  requires:
+    DBD::SQLite:                                0
+    Catalyst::Model::DBIC::Schema:              0
+    Catalyst::Plugin::Session::State::Cookie:   0
+    Test::WWW::Mechanize::Catalyst:             0
