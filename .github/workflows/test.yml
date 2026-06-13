@@ -96,7 +96,7 @@ jobs:
 
     env:
       AUTOMATED_TESTING: 1
-      PERL_USE_UNSAFE_INC: 0
+      # PERL_USE_UNSAFE_INC: 0
 
     steps:
       - name: Download build
