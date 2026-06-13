@@ -6,7 +6,7 @@ use base qw/Class::Accessor::Fast/;
 use Carp qw/carp/;
 use Scalar::Util qw/blessed/;
 
-# VERSION
+our $VERSION = '0.15';
 
 __PACKAGE__->mk_accessors(qw/model id_field data_field _session_row _flash_row/);
 
@@ -105,6 +105,7 @@ sub clear_flash {
 }
 
 1;
+
 __END__
 
 =head1 NAME
@@ -154,16 +155,3 @@ Deletes the session row for this delegate, forcing a re-fetch on the next access
 =head2 clear_flash
 
 Deletes the flash row for this delegate, forcing a re-fetch on the next access.
-
-=head1 AUTHOR
-
-Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>
-
-Andrew Rodland E<lt>andrew@cleverdomain.orgE<gt>
-
-=head1 COPYRIGHT
-
-Copyright 2006-2008 the L</AUTHORS> as listed above.
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.

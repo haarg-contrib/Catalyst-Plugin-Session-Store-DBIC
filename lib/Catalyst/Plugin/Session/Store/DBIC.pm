@@ -10,7 +10,7 @@ use MRO::Compat;
 use Storable ();
 use Carp qw(croak);
 
-# VERSION
+our $VERSION = '0.15';
 
 sub setup_finished {
     my $c = shift;
@@ -129,7 +129,7 @@ __END__
 
 =encoding UTF-8
 
-=for :stopwords MD5 Grundman Kamholz Yuval Kogman
+=for :stopwords MD5
 
 =head1 NAME
 
@@ -313,13 +313,9 @@ Note that you can change the column names using the L</id_field>,
 L</data_field>, and L</expires_field> configuration parameters.
 However, the column types must match the above.
 
-=head1 AUTHORS
-
-Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>
-
-Andrew Rodland E<lt>andrew@cleverdomain.orgE<gt>
-
 =head1 ACKNOWLEDGMENTS
+
+=for stopwords Grundman Kamholz Yuval Kogman
 
 =over 4
 
@@ -335,12 +331,3 @@ Andrew Rodland E<lt>andrew@cleverdomain.orgE<gt>
         exceeds DBIx::Class storage size.
 
 =back
-
-=head1 COPYRIGHT
-
-Copyright (c) 2006 - 2026
-the Catalyst::Plugin::Session::Store::DBIC L</AUTHORS>
-as listed above.
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
