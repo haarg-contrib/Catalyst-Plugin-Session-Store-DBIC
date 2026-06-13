@@ -294,7 +294,7 @@ SHA-1 or MD5 is used, but SHA-256 will need all 72 characters.
 The C<session_data> column should be a long text field.  Session data
 is encoded using L<MIME::Base64> before being stored in the database.
 
-Note that MySQL C<TEXT> fields only store 64 kB, so if your session
+Note that MySQL C<TEXT> fields only store 64 KB, so if your session
 data will exceed that size you'll want to use C<MEDIUMTEXT>,
 C<MEDIUMBLOB>, or larger. If you configure your
 L<DBIx::Class::ResultSource> to include the size of the column, you
