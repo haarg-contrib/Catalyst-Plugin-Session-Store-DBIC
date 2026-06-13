@@ -11,6 +11,125 @@ use Storable ();
 
 # VERSION
 
+sub setup_finished {
+    my $c = shift;
+
+    return $c->next::method unless @_;
+
+    # Try to determine id_field if it isn't set
+    unless ($c->_session_plugin_config->{id_field}) {
+        my $model = $c->session_store_model;
+        my $rs = ref $model ? $model
+            : $model->can('resultset_instance') ? $model->resultset_instance
+            : $model;
+        my @primary_columns = $rs->result_source->primary_columns;
+
+        Catalyst::Exception->throw(
+            message => __PACKAGE__ . qq/: Primary key consists of more than one column; please set id_field manually/
+        ) if @primary_columns > 1;
+
+        $c->_session_plugin_config->{id_field} = $primary_columns[0];
+    }
+
+    $c->next::method(@_);
+}
+
+sub session_store_dbic_class {
+    shift->_session_plugin_config->{dbic_class} || 'DBIC::Session';
+}
+
+sub session_store_dbic_id_field {
+    shift->_session_plugin_config->{id_field} || 'id';
+}
+
+sub session_store_dbic_data_field {
+    shift->_session_plugin_config->{data_field} || 'session_data';
+}
+
+sub session_store_dbic_expires_field {
+    shift->_session_plugin_config->{expires_field} || 'expires';
+}
+
+sub session_store_model {
+    my ($c, $id) = @_;
+
+    my $dbic_class = $c->session_store_dbic_class;
+    $c->model($dbic_class, $id) or die "Couldn't find a model named $dbic_class";
+}
+
+sub get_session_store_delegate {
+    my ($c, $id) = @_;
+
+    Catalyst::Plugin::Session::Store::DBIC::Delegate->new({
+        model      => $c->session_store_model($id),
+        id_field   => $c->session_store_dbic_id_field,
+        data_field => $c->session_store_dbic_data_field,
+    });
+}
+
+sub session_store_delegate_key_to_accessor {
+    my $c = shift;
+    my $key = $_[0];
+    my ($field, @args) = $c->next::method(@_);
+
+    my ($type) = ($key =~ /^(\w+):/);
+
+    $field = $c->session_store_dbic_id_field      if $field eq 'id';
+    $field = $c->session_store_dbic_expires_field if $field eq 'expires';
+    $field = $c->session_store_dbic_data_field    if $field eq 'session' or $field eq 'flash';
+
+    my $accessor = sub { shift->$type($key)->$field(@_) };
+
+    if ($field eq $c->session_store_dbic_data_field) {
+        @args = map { MIME::Base64::encode(Storable::nfreeze($_ || '')) } @args;
+        $accessor = sub {
+            my $value = shift->$type($key)->$field(@_);
+            return unless $value;
+            return Storable::thaw(MIME::Base64::decode($value));
+        };
+    }
+
+    return ($accessor, @args);
+}
+
+sub delete_session_data {
+    my ($c, $key) = @_;
+
+    # expires is stored on the session row for compatibility with Store::DBI
+    return if $key =~ /^expires/;
+
+    $c->session_store_model->search({
+        $c->session_store_dbic_id_field => $key,
+    })->delete;
+
+    return if !$c->_session_store_delegate;
+
+    my ($field) = split /:/, $key;
+    if ($field eq 'session') {
+        $c->_session_store_delegate->clear_session;
+    } elsif ($field eq 'flash') {
+        $c->_session_store_delegate->clear_flash;
+    }
+}
+
+sub delete_expired_sessions {
+    my $c = shift;
+
+    $c->session_store_model->search({
+        $c->session_store_dbic_expires_field => { '<', time() },
+    })->delete;
+}
+
+1;
+
+__END__
+
+=pod
+
+=encoding UTF-8
+
+=for :stopwords MD5 Grundman Kamholz Yuval Kogman
+
 =head1 NAME
 
 Catalyst::Plugin::Session::Store::DBIC - Store your sessions via DBIx::Class
@@ -64,173 +183,44 @@ that instead.
 
 Hook into the configured session class.
 
-=cut
-
-sub setup_finished {
-    my $c = shift;
-
-    return $c->next::method unless @_;
-
-    # Try to determine id_field if it isn't set
-    unless ($c->_session_plugin_config->{id_field}) {
-        my $model = $c->session_store_model;
-        my $rs = ref $model ? $model
-            : $model->can('resultset_instance') ? $model->resultset_instance
-            : $model;
-        my @primary_columns = $rs->result_source->primary_columns;
-
-        Catalyst::Exception->throw(
-            message => __PACKAGE__ . qq/: Primary key consists of more than one column; please set id_field manually/
-        ) if @primary_columns > 1;
-
-        $c->_session_plugin_config->{id_field} = $primary_columns[0];
-    }
-
-    $c->next::method(@_);
-}
-
 =head2 session_store_dbic_class
 
 Return the L<DBIx::Class> class name to be passed to C<< $c->model >>.
 Defaults to C<DBIC::Session>.
 
-=cut
-
-sub session_store_dbic_class {
-    shift->_session_plugin_config->{dbic_class} || 'DBIC::Session';
-}
-
 =head2 session_store_dbic_id_field
 
 Return the configured ID field name.  Defaults to C<id>.
-
-=cut
-
-sub session_store_dbic_id_field {
-    shift->_session_plugin_config->{id_field} || 'id';
-}
 
 =head2 session_store_dbic_data_field
 
 Return the configured data field name.  Defaults to C<session_data>.
 
-=cut
-
-sub session_store_dbic_data_field {
-    shift->_session_plugin_config->{data_field} || 'session_data';
-}
-
 =head2 session_store_dbic_expires_field
 
 Return the configured expires field name.  Defaults to C<expires>.
 
-=cut
-
-sub session_store_dbic_expires_field {
-    shift->_session_plugin_config->{expires_field} || 'expires';
-}
-
 =head2 session_store_model
 
 Return the model used to find a session.
-
-=cut
-
-sub session_store_model {
-    my ($c, $id) = @_;
-
-    my $dbic_class = $c->session_store_dbic_class;
-    $c->model($dbic_class, $id) or die "Couldn't find a model named $dbic_class";
-}
 
 =head2 get_session_store_delegate
 
 Load the row corresponding to the specified session ID.  If none is
 found, one is automatically created.
 
-=cut
-
-sub get_session_store_delegate {
-    my ($c, $id) = @_;
-
-    Catalyst::Plugin::Session::Store::DBIC::Delegate->new({
-        model      => $c->session_store_model($id),
-        id_field   => $c->session_store_dbic_id_field,
-        data_field => $c->session_store_dbic_data_field,
-    });
-}
-
 =head2 session_store_delegate_key_to_accessor
 
 Match the specified key and operation to the session ID and field
 name.
 
-=cut
-
-sub session_store_delegate_key_to_accessor {
-    my $c = shift;
-    my $key = $_[0];
-    my ($field, @args) = $c->next::method(@_);
-
-    my ($type) = ($key =~ /^(\w+):/);
-
-    $field = $c->session_store_dbic_id_field      if $field eq 'id';
-    $field = $c->session_store_dbic_expires_field if $field eq 'expires';
-    $field = $c->session_store_dbic_data_field    if $field eq 'session' or $field eq 'flash';
-
-    my $accessor = sub { shift->$type($key)->$field(@_) };
-
-    if ($field eq $c->session_store_dbic_data_field) {
-        @args = map { MIME::Base64::encode(Storable::nfreeze($_ || '')) } @args;
-        $accessor = sub {
-            my $value = shift->$type($key)->$field(@_);
-            return unless $value;
-            return Storable::thaw(MIME::Base64::decode($value));
-        };
-    }
-
-    return ($accessor, @args);
-}
-
 =head2 delete_session_data
 
 Delete the specified session from the backend store.
 
-=cut
-
-sub delete_session_data {
-    my ($c, $key) = @_;
-
-    # expires is stored on the session row for compatibility with Store::DBI
-    return if $key =~ /^expires/;
-
-    $c->session_store_model->search({
-        $c->session_store_dbic_id_field => $key,
-    })->delete;
-
-    return if !$c->_session_store_delegate;
-
-    my ($field) = split /:/, $key;
-    if ($field eq 'session') {
-        $c->_session_store_delegate->clear_session;
-    } elsif ($field eq 'flash') {
-        $c->_session_store_delegate->clear_flash;
-    }
-}
-
 =head2 delete_expired_sessions
 
 Delete all expired sessions.
-
-=cut
-
-sub delete_expired_sessions {
-    my $c = shift;
-
-    $c->session_store_model->search({
-        $c->session_store_dbic_expires_field => { '<', time() },
-    })->delete;
-}
 
 =head1 CONFIGURATION
 
@@ -340,7 +330,7 @@ Andrew Rodland E<lt>andrew@cleverdomain.orgE<gt>
 =item * Yuval Kogman, for assistance in converting to
         L<Catalyst::Plugin::Session::Store::Delegate>
 
-=item * Jay Hannah, for tests and warning when session size 
+=item * Jay Hannah, for tests and warning when session size
         exceeds DBIx::Class storage size.
 
 =back
@@ -353,7 +343,3 @@ as listed above.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
-
-=cut
-
-1;
