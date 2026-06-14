@@ -9,7 +9,7 @@ use MIME::Base64 ();
 use MRO::Compat;
 use Storable ();
 
-our $VERSION = '0.14';
+# VERSION
 
 =head1 NAME
 
@@ -313,9 +313,11 @@ Note that you can change the column names using the L</id_field>,
 L</data_field>, and L</expires_field> configuration parameters.
 However, the column types must match the above.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>
+
+Andrew Rodland E<lt>andrew@cleverdomain.orgE<gt>
 
 =head1 ACKNOWLEDGMENTS
 
@@ -336,8 +338,8 @@ Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2006 - 2009
-the Catalyst::Plugin::Session::Store::DBIC L</AUTHOR>
+Copyright (c) 2006 - 2026
+the Catalyst::Plugin::Session::Store::DBIC L</AUTHORS>
 as listed above.
 
 This program is free software; you can redistribute it and/or modify it

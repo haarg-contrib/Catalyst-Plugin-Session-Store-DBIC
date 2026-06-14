@@ -6,6 +6,8 @@ use base qw/Class::Accessor::Fast/;
 use Carp qw/carp/;
 use Scalar::Util qw/blessed/;
 
+# VERSION
+
 __PACKAGE__->mk_accessors(qw/model id_field data_field _session_row _flash_row/);
 
 =head1 NAME
@@ -146,9 +148,11 @@ sub _clear_instance_data {
 
 Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>
 
+Andrew Rodland E<lt>andrew@cleverdomain.orgE<gt>
+
 =head1 COPYRIGHT
 
-Copyright 2006-2008 Daniel Westermann-Clark, all rights reserved.
+Copyright 2006-2008 the L</AUTHORS> as listed above.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
