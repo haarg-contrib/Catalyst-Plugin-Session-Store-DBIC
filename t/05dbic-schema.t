@@ -64,6 +64,16 @@ $mech->content_is($value, 'got session value back');
 $mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value');
 $mech->content_is($value, 'got session value back');
 
+# Check change_session_id
+$mech->get_ok("http://localhost/session/sessionid", 'request current session ID');
+my $sid = $mech->content;
+$mech->get_ok("http://localhost/session/change", 'request to change session ID');
+$mech->content_is('ok', 'successful');
+$mech->get_ok("http://localhost/session/sessionid", 'request current session ID');
+ok($mech->content ne $sid, 'session ID changed');
+$mech->get_ok("http://localhost/session/output?key=$key", 'request to get session value');
+$mech->content_is($value, 'got session value back');
+
 # Exceed our session storage capactity
 $value = "blah" x 200;
 warnings_exist {
