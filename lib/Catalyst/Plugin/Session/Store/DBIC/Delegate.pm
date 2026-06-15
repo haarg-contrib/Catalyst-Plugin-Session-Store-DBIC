@@ -144,6 +144,30 @@ sub _clear_instance_data {
     $self->_flash_row(undef);
 }
 
+=head2 clear_session
+
+Deletes the session row for this delegate, forcing a re-fetch on the next access.
+
+=cut
+
+sub clear_session {
+    my ($self) = @_;
+
+    $self->_session_row(undef);
+}
+
+=head2 clear_flash
+
+Deletes the flash row for this delegate, forcing a re-fetch on the next access.
+
+=cut
+
+sub clear_flash {
+    my ($self) = @_;
+
+    $self->_flash_row(undef);
+}
+
 =head1 AUTHOR
 
 Daniel Westermann-Clark E<lt>danieltwc@cpan.orgE<gt>

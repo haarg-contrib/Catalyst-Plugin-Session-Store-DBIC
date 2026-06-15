@@ -21,7 +21,7 @@ BEGIN {
     eval { require Catalyst::Model::DBIC::Schema }
         or plan skip_all => "Catalyst::Model::DBIC::Schema is required for this test";
 
-    plan tests => 14;
+    plan tests => 21;
 
     $TestApp::DB_FILE = "$FindBin::Bin/session.db";
 

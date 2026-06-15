@@ -207,6 +207,15 @@ sub delete_session_data {
     $c->session_store_model->search({
         $c->session_store_dbic_id_field => $key,
     })->delete;
+
+    return if !$c->_session_store_delegate;
+
+    my ($field) = split /:/, $key;
+    if ($field eq 'session') {
+        $c->_session_store_delegate->clear_session;
+    } elsif ($field eq 'flash') {
+        $c->_session_store_delegate->clear_flash;
+    }
 }
 
 =head2 delete_expired_sessions
